@@ -25,16 +25,23 @@ public class EchoServer {
         BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         String inputLine, outputLine;
         while ((inputLine = in.readLine()) != null) {
+            if (inputLine.equals("Bye")){
+                out.close();
+                in.close();
+                clientSocket.close();
+                serverSocket.close();
+            }
             System.out.println("Mensaje:" + inputLine);
+            try {  
+                outputLine = String.valueOf(Double.parseDouble(inputLine)*Double.parseDouble(inputLine));  
+            } catch(NumberFormatException e){  
+                outputLine = "Respuesta" + inputLine ; 
+            }  
+            out.println(outputLine);
         } 
         outputLine = "Respuesta" + inputLine ;
-        out.println(outputLine);
-        if (outputLine.equals("Respuestas: Bye.")){
-            out.close();
-            in.close();
-            clientSocket.close();
-            serverSocket.close();
-        }
+        
+
             
             
         }
