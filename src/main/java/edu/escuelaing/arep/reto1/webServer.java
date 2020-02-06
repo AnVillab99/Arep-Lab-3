@@ -10,6 +10,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
@@ -42,12 +44,14 @@ public class webServer {
                 }
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));// leer
                 out = new PrintWriter(clientSocket.getOutputStream(), true); // devolver
+                dataOut = new BufferedOutputStream(clientSocket.getOutputStream());
                 String inputLine = in.readLine();
                 String[] header = inputLine.split(" ");
-            
+                
                 while (inputLine != null) {
                     //System.out.println("inputline " + inputLine);
                     if (!(in.ready())) {
+                        System.out.println("va a salirse");
                         break;
                     }
                     inputLine = in.readLine();
@@ -149,7 +153,7 @@ public class webServer {
                 System.out.println("entro a a html");
                 byte[] fileByte = new byte[(int) response.length()];
                 FileInputStream fileO = null;
-                System.out.println(response);
+                System.out.println("response :"+response);
                 fileO = new FileInputStream(response);
                 fileO.read(fileByte);
                 
@@ -157,6 +161,10 @@ public class webServer {
                     fileO.close();
                 }
                 System.out.println("2");
+                System.out.println("data out "+dataOut.toString());
+                System.out.println(fileByte);
+                System.out.println(response.length());
+
                 dataOut.write(fileByte, 0, (int) response.length());
                 System.out.println("4");
                 dataOut.flush();
