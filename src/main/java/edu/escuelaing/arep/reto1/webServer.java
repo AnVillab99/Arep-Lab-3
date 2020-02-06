@@ -34,27 +34,30 @@ public class webServer {
         BufferedOutputStream dataOut = null;
         Socket clientSocket = null;
         boolean conectado = true;
+      
         while (conectado) {
-            try {
+            try{
+            
                 clientSocket = serverSocket.accept();
                 System.out.println("Conectado");
             } catch (IOException e) {
                 System.out.println("Error al conectar al cliente");
             }
+            try{
+
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));// leer
             out = new PrintWriter(clientSocket.getOutputStream(), true); // devolver
             dataOut = new BufferedOutputStream(clientSocket.getOutputStream());
             String inputLine = in.readLine();
-            System.out.println("la inputLine: ");
-            System.out.println(inputLine);
-            System.out.println("la inputLine termina  ");
             String[] header = inputLine.split(" ");
-
+            System.out.println("i");
+            System.out.println(inputLine);
             while (inputLine != null) {
-                // System.out.println("inputline " + inputLine);
                 if (!(in.ready())) {
-                    System.out.println("va a salirse");
+                    //System.out.println("como entra aca");
+                    System.out.println("xxxxxxxxxxxxxxx");
                     break;
+                    //break;
                 }
                 inputLine = in.readLine();
 
@@ -66,8 +69,10 @@ public class webServer {
                     rFile = new File(ROOT, DEFAULT);
                     // respond(out, dataOut, rFile, "text/html", "200");
                 } else {
+                    System.out.println("header 1"+header[1]);
 
                     String[] s = soportado(header[1]);
+                    System.out.println(s[0]);
 
                     if (s[0].equals("ok")) {
                         rFile = new File(ROOT, s[1] + header[1]);
@@ -98,31 +103,39 @@ public class webServer {
             
             clientSocket.close();
         }
+        catch (Exception e){
+            System.out.println("error misterioso");
+            System.out.println(e);}
+        }
 
         out.close();
         in.close();
         serverSocket.close();
         clientSocket.close();
+   
 
     }
 
     private static String[] soportado(String peticionGet) {
         String[] ans = new String[3];
+        System.out.println("peticion es : "+peticionGet);
         if (peticionGet.endsWith(".png")) {
             ans[0] = "ok";
             ans[1] = "/imgs";
             ans[2] = "image/png";
         }
 
-        if (peticionGet.endsWith(".jpg")) {
+        else if (peticionGet.endsWith(".jpg")) {
             ans[0] = "ok";
             ans[1] = "/imgs";
             ans[2] = "image/jpg";
-        } else if (peticionGet.endsWith(".html")) {
+        } 
+        else if (peticionGet.endsWith(".html")) {
             ans[0] = "ok";
             ans[1] = "";
             ans[2] = "text/html";
-        } else {
+        } 
+        else {
             ans[0] = "error";
             ans[1] = "";
             ans[2] = "";
@@ -152,23 +165,16 @@ public class webServer {
                 dataOut.write(os.toByteArray());
                 dataOut.flush();
             } else {
-                System.out.println("entro a a html");
                 byte[] fileByte = new byte[(int) response.length()];
                 FileInputStream fileO = null;
-                System.out.println("response :" + response);
                 fileO = new FileInputStream(response);
                 fileO.read(fileByte);
 
                 if (fileO != null) {
                     fileO.close();
                 }
-                System.out.println("2");
-                System.out.println("data out " + dataOut.toString());
-                System.out.println(fileByte);
-                System.out.println(response.length());
 
                 dataOut.write(fileByte, 0, (int) response.length());
-                System.out.println("4");
                 dataOut.flush();
             }
         } catch (Exception e) {
