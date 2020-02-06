@@ -27,81 +27,83 @@ public class webServer {
     public static void main(String[] args) throws IOException {
 
         ServerSocket serverSocket = null;
-        try {
-            serverSocket = new ServerSocket(PORT);
-            System.out.println("Abierto");
-            PrintWriter out = null;
-            BufferedReader in = null;
-            BufferedOutputStream dataOut = null;
-            Socket clientSocket = null;
-            boolean conectado = true;
-            while (conectado) {
-                try {
-                    clientSocket = serverSocket.accept();
-                    System.out.println("Conectado");
-                } catch (IOException e) {
-                    System.out.println("Error al conectar al cliente");
+        serverSocket = new ServerSocket(PORT);
+        System.out.println("Abierto");
+        PrintWriter out = null;
+        BufferedReader in = null;
+        BufferedOutputStream dataOut = null;
+        Socket clientSocket = null;
+        boolean conectado = true;
+        while (conectado) {
+            try {
+                clientSocket = serverSocket.accept();
+                System.out.println("Conectado");
+            } catch (IOException e) {
+                System.out.println("Error al conectar al cliente");
+            }
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));// leer
+            out = new PrintWriter(clientSocket.getOutputStream(), true); // devolver
+            dataOut = new BufferedOutputStream(clientSocket.getOutputStream());
+            String inputLine = in.readLine();
+            System.out.println("la inputLine: ");
+            System.out.println(inputLine);
+            System.out.println("la inputLine termina  ");
+            String[] header = inputLine.split(" ");
+
+            while (inputLine != null) {
+                // System.out.println("inputline " + inputLine);
+                if (!(in.ready())) {
+                    System.out.println("va a salirse");
+                    break;
                 }
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));// leer
-                out = new PrintWriter(clientSocket.getOutputStream(), true); // devolver
-                dataOut = new BufferedOutputStream(clientSocket.getOutputStream());
-                String inputLine = in.readLine();
-                String[] header = inputLine.split(" ");
-                
-                while (inputLine != null) {
-                    //System.out.println("inputline " + inputLine);
-                    if (!(in.ready())) {
-                        System.out.println("va a salirse");
-                        break;
-                    }
-                    inputLine = in.readLine();
+                inputLine = in.readLine();
 
-                }
-                
-                if (header[0].equals("GET")) {
-                    File rFile = null;
-                    if (header[1].equals("/")) {
-                        rFile = new File(ROOT, DEFAULT);
-                        // respond(out, dataOut, rFile, "text/html", "200");
-                    } else {
-
-                        String[] s = soportado(header[1]);
-
-                        if (s[0].equals("ok")) {
-                            rFile = new File(ROOT, s[1] + header[1]);
-                            if (rFile.exists()) {
-                                respond(out, dataOut, rFile, s[2], "200");
-
-                            } else {
-                                rFile = new File(ROOT, FILE_NOT_FOUND);
-                                respond(out, dataOut, rFile, "text/html", "404");
-                            }
-                        }
-
-                        else {
-                            rFile = new File(ROOT, UNSUPPORTED_MEDIA_TYPE);
-                            respond(out, dataOut, rFile, "text/html", "415");
-                        }
-
-                    }
-
-                }
-
-                else {
-                    File f = new File(ROOT, METHOD_NOT_ALLOWED);
-                    respond(out, dataOut, f, "text/html", "405");
-                }
             }
 
+            if (header[0].equals("GET")) {
+                File rFile = null;
+                if (header[1].equals("/")) {
+                    rFile = new File(ROOT, DEFAULT);
+                    // respond(out, dataOut, rFile, "text/html", "200");
+                } else {
+
+                    String[] s = soportado(header[1]);
+
+                    if (s[0].equals("ok")) {
+                        rFile = new File(ROOT, s[1] + header[1]);
+                        if (rFile.exists()) {
+                            respond(out, dataOut, rFile, s[2], "200");
+
+                        } else {
+                            rFile = new File(ROOT, FILE_NOT_FOUND);
+                            respond(out, dataOut, rFile, "text/html", "404");
+                        }
+                    }
+
+                    else {
+                        rFile = new File(ROOT, UNSUPPORTED_MEDIA_TYPE);
+                        respond(out, dataOut, rFile, "text/html", "415");
+                    }
+
+                }
+
+            }
+
+            else {
+                File f = new File(ROOT, METHOD_NOT_ALLOWED);
+                respond(out, dataOut, f, "text/html", "405");
+            }
             out.close();
             in.close();
-            serverSocket.close();
+            
             clientSocket.close();
-
-        } catch (Exception e) {
-            System.out.println("erro en get");
-            System.out.println(e);
         }
+
+        out.close();
+        in.close();
+        serverSocket.close();
+        clientSocket.close();
+
     }
 
     private static String[] soportado(String peticionGet) {
@@ -131,15 +133,15 @@ public class webServer {
 
     private static void respond(PrintWriter out, BufferedOutputStream dataOut, File response, String type,
             String code) {
-        out.println("HTTP/1.1 " + response);   
+        out.println("HTTP/1.1 " + response);
         out.println("Server: Java HTTP Server from AnVillab99 : 1.0");
         out.println("Date: " + new Date());
-        out.println("Content-type: " +type); 
-        out.println("Content-length: " + response.length()); 
+        out.println("Content-type: " + type);
+        out.println("Content-length: " + response.length());
         out.println();
         out.flush();
         // Content
-        
+
         String[] con = type.split("/");
         try {
             if (con[0].equals("image")) {
@@ -153,15 +155,15 @@ public class webServer {
                 System.out.println("entro a a html");
                 byte[] fileByte = new byte[(int) response.length()];
                 FileInputStream fileO = null;
-                System.out.println("response :"+response);
+                System.out.println("response :" + response);
                 fileO = new FileInputStream(response);
                 fileO.read(fileByte);
-                
+
                 if (fileO != null) {
                     fileO.close();
                 }
                 System.out.println("2");
-                System.out.println("data out "+dataOut.toString());
+                System.out.println("data out " + dataOut.toString());
                 System.out.println(fileByte);
                 System.out.println(response.length());
 
